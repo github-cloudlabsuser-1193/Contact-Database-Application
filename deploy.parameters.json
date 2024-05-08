@@ -9,10 +9,10 @@
       "value": "<Your Database Name>"
     },
     "adminUsername": {
-      "value": "<Your Admin Username>"
+      "value": "azureuser"
     },
     "adminPassword": {
-      "value": "<Your Admin Password>"
+      "value": "qewf61ZEA*12"
     }
   }
 }

@@ -2,58 +2,48 @@
   "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "serverName": {
+    "appServicePlanName": {
       "type": "string",
       "metadata": {
-        "description": "The name of the SQL Server."
+        "description": "The name of the App Service Plan."
       }
     },
-    "databaseName": {
+    "appServicePlanSku": {
+      "type": "string",
+      "defaultValue": "F1",
+      "metadata": {
+        "description": "The SKU of the App Service Plan."
+      }
+    },
+    "webAppName": {
       "type": "string",
       "metadata": {
-        "description": "The name of the SQL Database."
-      }
-    },
-    "adminUsername": {
-      "type": "string",
-      "metadata": {
-        "description": "The username of the SQL Server admin."
-      }
-    },
-    "adminPassword": {
-      "type": "securestring",
-      "metadata": {
-        "description": "The password of the SQL Server admin."
+        "description": "The name of the Web App."
       }
     }
   },
   "resources": [
     {
-      "type": "Microsoft.Sql/servers",
-      "apiVersion": "2020-08-01-preview",
-      "name": "[parameters('serverName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('appServicePlanName')]",
       "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "[parameters('appServicePlanSku')]",
+        "capacity": 1
+      }
+    },
+    {
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2020-06-01",
+      "name": "[parameters('webAppName')]",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+      ],
       "properties": {
-        "administratorLogin": "[parameters('adminUsername')]",
-        "administratorLoginPassword": "[parameters('adminPassword')]"
-      },
-      "resources": [
-        {
-          "type": "databases",
-          "apiVersion": "2020-08-01-preview",
-          "name": "[parameters('databaseName')]",
-          "location": "[resourceGroup().location]",
-          "dependsOn": [
-            "[concat('Microsoft.Sql/servers/', parameters('serverName'))]"
-          ],
-          "properties": {
-            "collation": "SQL_Latin1_General_CP1_CI_AS",
-            "edition": "Standard",
-            "maxSizeBytes": "1073741824",
-            "requestedServiceObjectiveName": "S0"
-          }
-        }
-      ]
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', parameters('appServicePlanName'))]"
+      }
     }
   ]
 }
